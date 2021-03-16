@@ -37,5 +37,9 @@ jobs:
       working-directory: ${{ github.workspace }}
       run: msbuild /m /p:Configuration="Debug" /p:UseSharedCompilation=false /p:Platform="x64" ${{ env.SOLUTION_FILE_PATH }}
 
+    - name: Debug information
+      working-directory: ${{ github.workspace }}
+      run: type %ODASA_TRACER_CONFIGURATION% && echo $CODEQL_EXTRACTOR_CPP_LOG_DIR
+
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
