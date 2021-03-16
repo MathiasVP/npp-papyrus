@@ -39,7 +39,7 @@ jobs:
 
     - name: Debug information
       working-directory: ${{ github.workspace }}
-      run: ls D:\a\_temp\codeql_databases\cpp\log
+      run: cat $Env:CODEQL_EXTRACTOR_CPP_LOG_DIR/build-tracer.log
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
