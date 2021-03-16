@@ -40,5 +40,8 @@ jobs:
     - name: Check foo
       run: ls foo
 
+    - name: Print codeql-database.yml
+      run: cat foo/codeql-database.yml
+
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
