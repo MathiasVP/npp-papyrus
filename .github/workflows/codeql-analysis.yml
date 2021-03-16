@@ -29,12 +29,7 @@ jobs:
       uses: github/codeql-action/init@v1
       with:
         languages: cpp
-
-    - name: Normal CLI run
-      run: C:\hostedtoolcache\windows\CodeQL\0.0.0-20210308\x64\codeql\codeql database create foo --language=cpp --command=msbuild /m /p:Configuration=Debug /p:UseSharedCompilation=false /p:Platform=x64 PapyrusPlugin.sln
-
-    - name: Delete build-tracer log
-      run: rm D:\a\_temp\codeql_databases\cpp\log\build-tracer.log
+        tools: https://github.com/github/codeql-action/releases/download/codeql-bundle-20210304/codeql-bundle-win64.tar.gz
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1
@@ -42,10 +37,6 @@ jobs:
     - name: Build debuggable x64 plugin DLL
       working-directory: ${{ github.workspace }}
       run: msbuild /m /p:Configuration="Debug" /p:UseSharedCompilation=false /p:Platform="x64" ${{ env.SOLUTION_FILE_PATH }}
-
-    - name: Debug information
-      working-directory: ${{ github.workspace }}
-      run: cat D:\a\_temp\codeql_databases\cpp\log\build-tracer.log
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
