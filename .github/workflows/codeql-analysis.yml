@@ -39,7 +39,7 @@ jobs:
 
     - name: Debug information
       working-directory: ${{ github.workspace }}
-      run: type %ODASA_TRACER_CONFIGURATION% && echo $CODEQL_EXTRACTOR_CPP_LOG_DIR
+      run: type %ODASA_TRACER_CONFIGURATION% && ls D:\a\_temp\codeql_databases\cpp\log
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
