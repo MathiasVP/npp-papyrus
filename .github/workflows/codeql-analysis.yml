@@ -31,7 +31,7 @@ jobs:
         languages: cpp
 
     - name: Delete build-tracer log
-      run: D:\a\_temp\codeql_databases\cpp\log\build-tracer.log
+      run: rm D:\a\_temp\codeql_databases\cpp\log\build-tracer.log
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1
