@@ -37,5 +37,8 @@ jobs:
       working-directory: ${{ github.workspace }}
       run: C:\hostedtoolcache\windows\CodeQL\0.0.0-20210308\x64\codeql\codeql database create foo --language=cpp --command="msbuild /m /p:Configuration=Debug /p:UseSharedCompilation=false /p:Platform=x64 PapyrusPlugin.sln"
 
+    - name: Check foo
+      run: ls foo
+
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
