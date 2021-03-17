@@ -27,6 +27,10 @@ jobs:
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1
 
+    - name: Delete CodeQL
+      working-directory: ${{ github.workspace }}
+      run: rm codeql -r -fo
+
     - name: Download CodeQL
       working-directory: ${{ github.workspace }}
       run: Invoke-WebRequest -Uri https://github.com/github/codeql-cli-binaries/releases/download/v2.4.5/codeql-win64.zip -OutFile codeql-win64.zip
