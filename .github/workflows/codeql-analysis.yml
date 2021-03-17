@@ -33,7 +33,7 @@ jobs:
 
     - name: Unzip CodeQL
       working-directory: ${{ github.workspace }}
-      run: Expand-Archive -Path codeql-win64.zip -DestinationPath codeql -Force
+      run: Expand-Archive -Path codeql-win64.zip -DestinationPath . -Force
 
     - name: ls
       working-directory: ${{ github.workspace }}
