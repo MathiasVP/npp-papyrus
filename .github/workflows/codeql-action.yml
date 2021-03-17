@@ -1,0 +1,64 @@
+name: "CodeQL with Action"
+
+on: workflow_dispatch
+
+env:
+  # Path to the solution file relative to the root of the project.
+  SOLUTION_FILE_PATH: PapyrusPlugin.sln
+
+jobs:
+  Analyze:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      # Initializes the CodeQL tools for scanning.
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v1
+        with:
+          languages: cpp
+
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v1
+
+      - name: Build debuggable x64 plugin DLL
+        working-directory: ${{ github.workspace }}
+        run: msbuild /m /p:Configuration="Debug" /p:Platform="x64" ${{ env.SOLUTION_FILE_PATH }}
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: database1
+          path: ${{ runner.temp }}/codeql_databases
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v1
+
+  Analyze_no_shared:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      # Initializes the CodeQL tools for scanning.
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v1
+        with:
+          languages: cpp
+
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v1
+
+      - name: Build debuggable x64 plugin DLL
+        working-directory: ${{ github.workspace }}
+        run: msbuild /m /p:Configuration="Debug" /p:Platform="x64" /p:UseSharedCompilation=false ${{ env.SOLUTION_FILE_PATH }}
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: database1
+          path: ${{ runner.temp }}/codeql_databases
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v1

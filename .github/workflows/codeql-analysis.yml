@@ -1,13 +1,6 @@
-name: "CodeQL"
+name: "CodeQL with CLI"
 
-on:
-  push:
-    branches: [main]
-  pull_request:
-    types: [opened, synchronize]
-    branches: [main]
-  schedule:
-    - cron: '18 3 * * 2'
+on: workflow_dispatch
 
 env:
   # Path to the solution file relative to the root of the project.
@@ -17,34 +10,31 @@ jobs:
   Analyze:
     runs-on: windows-latest
 
-    strategy:
-      fail-fast: false
-
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
 
-    - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v1
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v1
 
-    - name: Download CodeQL
-      working-directory: ${{ github.workspace }}
-      run: Invoke-WebRequest -Uri https://github.com/github/codeql-cli-binaries/releases/download/v2.4.3/codeql-win64.zip -OutFile codeql-win64.zip
+      - name: Download CodeQL
+        working-directory: ${{ github.workspace }}
+        run: Invoke-WebRequest -Uri https://github.com/github/codeql-cli-binaries/releases/download/v2.4.3/codeql-win64.zip -OutFile codeql-win64.zip
 
-    - name: Unzip CodeQL
-      working-directory: ${{ github.workspace }}
-      run: Expand-Archive -Path codeql-win64.zip -DestinationPath . -Force
+      - name: Unzip CodeQL
+        working-directory: ${{ github.workspace }}
+        run: Expand-Archive -Path codeql-win64.zip -DestinationPath . -Force
 
-    - name: Set Semmle debug
-      working-directory: ${{ github.workspace }}
-      run: $Env:SEMMLE_DEBUG_TRACER=10000
+      - name: Set Semmle debug
+        working-directory: ${{ github.workspace }}
+        run: $Env:SEMMLE_DEBUG_TRACER=10000
 
-    - name: Build debuggable x64 plugin DLL
-      working-directory: ${{ github.workspace }}
-      continue-on-error: true
-      run: codeql\codeql.exe database create foo3 --language=cpp --command="msbuild /m /p:Configuration=Debug /p:UseSharedCompilation=false /p:Platform=x64 PapyrusPlugin.sln"
+      - name: Build debuggable x64 plugin DLL
+        working-directory: ${{ github.workspace }}
+        continue-on-error: true
+        run: codeql\codeql.exe database create foo3 --language=cpp --command="msbuild /m /p:Configuration=Debug /p:UseSharedCompilation=false /p:Platform=x64 PapyrusPlugin.sln"
 
-    - uses: actions/upload-artifact@v2
-      with:
-        name: Log files
-        path: foo3
+      - uses: actions/upload-artifact@v2
+        with:
+          name: Log files
+          path: foo3
