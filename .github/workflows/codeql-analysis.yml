@@ -38,12 +38,13 @@ jobs:
     - name: Set Semmle debug
       working-directory: ${{ github.workspace }}
       run: $Env:SEMMLE_DEBUG_TRACER=10000
-      
+
+    - name: Build debuggable x64 plugin DLL
+      working-directory: ${{ github.workspace }}
+      continue-on-error: true
+      run: codeql\codeql.exe database create foo3 --language=cpp --command="msbuild /m /p:Configuration=Debug /p:UseSharedCompilation=false /p:Platform=x64 PapyrusPlugin.sln"
+
     - uses: actions/upload-artifact@v2
       with:
         name: Log files
         path: foo3
-
-    - name: Build debuggable x64 plugin DLL
-      working-directory: ${{ github.workspace }}
-      run: codeql\codeql.exe database create foo3 --language=cpp --command="msbuild /m /p:Configuration=Debug /p:UseSharedCompilation=false /p:Platform=x64 PapyrusPlugin.sln"
