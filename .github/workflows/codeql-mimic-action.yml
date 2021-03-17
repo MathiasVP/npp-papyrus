@@ -1,0 +1,84 @@
+name: "CodeQL with fake Action"
+
+on: workflow_dispatch
+
+env:
+  # Path to the solution file relative to the root of the project.
+  SOLUTION_FILE_PATH: PapyrusPlugin.sln
+
+jobs:
+  Analyze:
+    runs-on: windows-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ["20210308", "20210304"]
+        flag: ["true", "false"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Download CodeQL bundle
+        working-directory: ${{ github.workspace }}
+        run: Invoke-WebRequest -Uri https://github.com/github/codeql-action/releases/download/codeql-bundle-${{ matrix.version }}/codeql-bundle-win64.tar.gz -OutFile codeql-bundle-win64.tar.gz
+
+      - name: Unzip CodeQL
+        working-directory: ${{ github.workspace }}
+        run: tar -xzf .\codeql-bundle-win64.tar.gz
+
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v1
+
+      - name: CodeQL init
+        working-directory: ${{ github.workspace }}
+        run: |
+          codeql\codeql.exe database init --language=cpp cpp --source-root=${{ github.workspace }}
+          codeql\codeql.exe database trace-command cpp -- set
+          copy cpp\working\tracing\compiler-tracing*.spec ${{ github.workspace }}/tracer-config
+          cat ${{ github.workspace }}/tracer-config
+          $id = $PID
+          while ($true) {
+            $p = Get-CimInstance -Class Win32_Process -Filter "ProcessId = $id"
+            Write-Host "Found process: $p"
+            if ($p -eq $null) {
+               throw "Could not determine Runner.Worker.exe process"
+            }
+            if ($p[0].Name -eq "Runner.Worker.exe") {
+              Break
+            } else {
+              $id = $p[0].ParentProcessId
+            }
+          }
+          Write-Host "Final process: $p"
+          Invoke-Expression "&${{ github.workspace }}\codeql\tools\win64\tracer.exe --inject=$id";
+
+      - name: Build debuggable x64 plugin DLL
+        working-directory: ${{ github.workspace }}
+        run: |
+          msbuild /m /p:Configuration="Debug" /p:Platform="x64" /p:UseSharedCompilation=${{ matrix.flag }} ${{ env.SOLUTION_FILE_PATH }}
+
+        env:
+          SOLUTION_FILE_PATH: PapyrusPlugin.sln
+          CODEQL_RAM: 6500
+          CODEQL_DIST: ${{ github.workspace }}\codeql
+          CODEQL_EXTRACTOR_CPP_LOG_DIR: ${{ github.workspace }}\cpp\log
+          CODEQL_EXTRACTOR_CPP_ROOT: ${{ github.workspace }}\codeql\cpp
+          CODEQL_EXTRACTOR_CPP_SCRATCH_DIR: ${{ github.workspace }}\cpp\working
+          CODEQL_EXTRACTOR_CPP_SOURCE_ARCHIVE_DIR: ${{ github.workspace }}\cpp\src
+          CODEQL_EXTRACTOR_CPP_TRAP_DIR: ${{ github.workspace }}\cpp\trap\cpp
+          CODEQL_EXTRACTOR_CPP_WIP_DATABASE: ${{ github.workspace }}\cpp
+          CODEQL_JAVA_HOME: ${{ github.workspace }}\codeql\tools\win64\java
+          CODEQL_PLATFORM: win64
+          CODEQL_PLATFORM_DLL_EXTENSION: .dll
+          ODASA_TRACER_CONFIGURATION: ${{ github.workspace }}\tracer-config
+          CODEQL_RUNNER: ${{ github.workspace }}\codeql\tools\win64\runner.exe
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.version }}_${{ matrix.flag }}
+          path: cpp
+
+      - name: Perform CodeQL Analysis
+        run: codeql\codeql.exe database finalize cpp

@@ -34,6 +34,11 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: msbuild /m /p:Configuration="Debug" /p:Platform="x64" /p:UseSharedCompilation=${{ matrix.flag }} ${{ env.SOLUTION_FILE_PATH }}
 
+      - name: Print compound spec
+        run: |
+          cat ${{ runner.temp }}/compound-spec
+          cat ${{ runner.temp }}/compound-build-tracer.log
+
       - uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.version }}_${{ matrix.flag }}
